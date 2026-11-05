@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>유치원 학부모 상담 일정 확인 도구 📝</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts (Gaegu, Noto Sans KR) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: '#FFFDF9',
+                        pastelOrange: '#FFE5D9',
+                        pastelOrangeDark: '#FF9B71',
+                        pastelBlue: '#D8E2DC',
+                        pastelBlueDark: '#4A8694',
+                        pastelBlueTag: '#E8F1F5',
+                        pastelBlueTagBorder: '#90C2C9',
+                        pastelPinkTag: '#FFE5EC',
+                        pastelPinkTagBorder: '#FFB3C6',
+                        warmGray: '#4A403A'
+                    },
+                    fontFamily: {
+                        cute: ['Gaegu', 'cursive'],
+                        sans: ['Noto Sans KR', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #FFFDF9;
+            background-image: radial-gradient(#FFDAC1 0.75px, transparent 0.75px), radial-gradient(#E2F0CB 0.75px, #FFFDF9 0.75px);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+            font-family: 'Noto Sans KR', sans-serif;
+            color: #4A403A;
+        }
+
+        /* Timeline Connector line styling */
+        .timeline-line::before {
+            content: '';
+            position: absolute;
+            top: 24px;
+            bottom: 24px;
+            left: 21px;
+            width: 3px;
+            background-color: #E2E8F0;
+            border-radius: 9999px;
+            z-index: 0;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FFFDF9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #FFDAC1;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-16 pt-6 px-4">
+    <!-- Header -->
+    <header class="max-w-5xl mx-auto text-center mb-8">
+        <div class="inline-block bg-white px-6 py-2.5 rounded-full shadow-sm border-2 border-amber-200 mb-3">
+            <span class="text-3xl">🌱 🧸 📋 💌</span>
+        </div>
+        <h1 class="font-cute text-4xl sm:text-5xl font-bold text-warmGray tracking-wide mb-2">
+            학부모 상담 일정 확인 도구
+        </h1>
+        <p class="text-sm sm:text-base text-gray-600">
+            상담 일정을 손쉽게 등록하고, 날짜별 타임라인으로 한눈에 관리해 보세요! 🌼
+        </p>
+    </header>
+
+    <main class="max-w-5xl mx-auto space-y-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- Left Panel: Input Form (4 Cols) -->
+            <section class="lg:col-span-5 bg-white/95 backdrop-blur-sm rounded-3xl p-6 shadow-xl border-2 border-orange-100">
+                <h2 class="font-cute text-2xl font-bold text-warmGray mb-4 flex items-center justify-between border-b pb-3 border-amber-100">
+                    <span class="flex items-center gap-2">
+                        <i class="fa-solid fa-calendar-plus text-amber-500"></i>
+                        상담 일정 등록
+                    </span>
+                    <button onclick="loadSampleData()" class="text-xs font-sans text-amber-700 bg-amber-50 px-2.5 py-1 rounded-xl border border-amber-200 hover:bg-amber-100 transition-all">
+                        ✨ 샘플 채우기
+                    </button>
+                </h2>
+
+                <form id="scheduleForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                    <!-- Date Input -->
+                    <div>
+                        <label for="consultDate" class="block text-xs font-bold text-gray-700 mb-1">
+                            <i class="fa-regular fa-calendar text-amber-500 mr-1"></i>상담 날짜
+                        </label>
+                        <input type="date" id="consultDate" required
+                            class="w-full px-3.5 py-2.5 text-sm rounded-2xl border-2 border-amber-100 focus:outline-none focus:border-amber-400 bg-amber-50/20">
+                    </div>
+
+                    <!-- Time Input -->
+                    <div>
+                        <label for="consultTime" class="block text-xs font-bold text-gray-700 mb-1">
+                            <i class="fa-regular fa-clock text-amber-500 mr-1"></i>상담 시간
+                        </label>
+                        <input type="time" id="consultTime" required
+                            class="w-full px-3.5 py-2.5 text-sm rounded-2xl border-2 border-amber-100 focus:outline-none focus:border-amber-400 bg-amber-50/20">
+                    </div>
+
+                    <!-- Child Name -->
+                    <div>
+                        <label for="childName" class="block text-xs font-bold text-gray-700 mb-1">
+                            <i class="fa-solid fa-child text-amber-500 mr-1"></i>유아 이름
+                        </label>
+                        <input type="text" id="childName" placeholder="예: 김민준" required
+                            class="w-full px-3.5 py-2.5 text-sm rounded-2xl border-2 border-amber-100 focus:outline-none focus:border-amber-400 bg-white">
+                    </div>
+
+                    <!-- Consultation Type Toggle -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">
+                            <i class="fa-solid fa-comments text-amber-500 mr-1"></i>상담 유형
+                        </label>
+                        <div class="grid grid-cols-2 gap-2 p-1 bg-amber-50/60 rounded-2xl border border-amber-100">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="consultType" value="방문" checked class="peer sr-only">
+                                <div class="py-2 text-center text-xs font-bold rounded-xl transition-all peer-checked:bg-rose-400 peer-checked:text-white text-gray-600 shadow-none peer-checked:shadow-sm flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-school"></i> 방문 상담
+                                </div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="consultType" value="전화" class="peer sr-only">
+                                <div class="py-2 text-center text-xs font-bold rounded-xl transition-all peer-checked:bg-teal-500 peer-checked:text-white text-gray-600 shadow-none peer-checked:shadow-sm flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-phone"></i> 전화 상담
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Memo / Pre-notes -->
+                    <div>
+                        <label for="consultMemo" class="block text-xs font-bold text-gray-700 mb-1">
+                            <i class="fa-regular fa-note-sticky text-amber-500 mr-1"></i>사전 메모 / 학부모 전달 사항
+                        </label>
+                        <textarea id="consultMemo" rows="3" placeholder="상담 주제(친구 관계, 교구 활동, 식습관 등) 및 메모를 입력해 주세요."
+                            class="w-full px-3.5 py-2.5 text-sm rounded-2xl border-2 border-amber-100 focus:outline-none focus:border-amber-400 bg-white resize-none"></textarea>
+                    </div>
+
+                    <!-- Form Action Buttons -->
+                    <div class="pt-2 flex gap-2">
+                        <button type="submit" id="btnSubmit"
+                            class="flex-1 py-3 bg-amber-300 hover:bg-amber-400 text-warmGray font-bold rounded-2xl transition-all shadow-md active:scale-95 text-sm flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-plus"></i> 일정 추가하기
+                        </button>
+                        <button type="button" id="btnCancelEdit" onclick="cancelEdit()" class="hidden px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-2xl text-sm">
+                            취소
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Right Panel: Schedule Timeline & Management (7 Cols) -->
+            <section class="lg:col-span-7 space-y-4">
+                
+                <!-- Action Controls Header -->
+                <div class="bg-white/95 backdrop-blur-sm rounded-3xl p-5 shadow-lg border-2 border-emerald-100 flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl shrink-0">
+                            📅
+                        </div>
+                        <div>
+                            <h3 class="font-cute text-2xl font-bold text-warmGray leading-none">상담 일정표</h3>
+                            <p class="text-xs text-gray-500 mt-1">총 <span id="totalScheduleCount" class="font-bold text-emerald-600">0</span>건의 상담이 등록되어 있습니다.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button onclick="copyTimelineSummary()" class="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-2xl text-xs font-bold border border-emerald-200 transition-all flex items-center gap-1.5">
+                            <i class="fa-solid fa-copy"></i> 일정 요약 복사
+                        </button>
+                        <button onclick="clearAllSchedules()" class="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-2xl text-xs font-bold border border-rose-200 transition-all flex items-center gap-1.5">
+                            <i class="fa-solid fa-trash-can"></i> 전체 비우기
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Timeline View Container -->
+                <div id="timelineContainer" class="space-y-6">
+                    <!-- Dynamic timeline group cards inserted via JS -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="hidden bg-white/80 rounded-3xl p-12 text-center border-2 border-dashed border-amber-200">
+                    <div class="text-5xl mb-3">🎈</div>
+                    <h4 class="font-cute text-2xl font-bold text-gray-700 mb-1">등록된 상담 일정이 없습니다</h4>
+                    <p class="text-xs text-gray-500 mb-4">왼쪽 폼에서 상담 일정을 추가하시거나 '샘플 채우기'를 눌러보세요.</p>
+                    <button onclick="loadSampleData()" class="px-4 py-2 bg-amber-300 text-warmGray text-xs font-bold rounded-2xl hover:bg-amber-400 transition-all shadow-sm">
+                        ✨ 샘플 데이터 불러오기
+                    </button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-warmGray text-white px-6 py-3 rounded-full shadow-2xl text-sm font-medium opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2 z-50">
+        <i class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toastMsg">클립보드에 복사되었습니다!</span>
+    </div>
+
+    <script>
+        // State for schedules
+        let schedules = [];
+        let editingId = null;
+
+        // Initialize Today's Date in input
+        document.addEventListener('DOMContentLoaded', () => {
+            const dateInput = document.getElementById('consultDate');
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.value = today;
+
+            loadSchedulesFromStorage();
+        });
+
+        // --- LocalStorage Logic ---
+        function loadSchedulesFromStorage() {
+            const stored = localStorage.getItem('kindergarten_consult_schedules');
+            if (stored) {
+                try {
+                    schedules = JSON.parse(stored);
+                } catch (e) {
+                    schedules = [];
+                }
+            } else {
+                // If first time visit, populate default sample data
+                schedules = getSampleSchedules();
+                saveSchedulesToStorage();
+            }
+            renderTimeline();
+        }
+
+        function saveSchedulesToStorage() {
+            localStorage.setItem('kindergarten_consult_schedules', JSON.stringify(schedules));
+        }
+
+        function getSampleSchedules() {
+            const today = new Date();
+            const formatDateStr = (d) => d.toISOString().split('T')[0];
+
+            const day1 = formatDateStr(today);
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const day2 = formatDateStr(tomorrow);
+
+            return [
+                { id: '1', date: day1, time: '10:00', child: '김민준', type: '방문', memo: '친구와의 교구 양보 및 사회성 발달 관련 논의' },
+                { id: '2', date: day1, time: '14:30', child: '박서아', type: '전화', memo: '원내 언어 표현력 확대 및 집에서의 언어 자극 방법' },
+                { id: '3', date: day1, time: '16:00', child: '이도윤', type: '방문', memo: '편식 조율 및 편안한 수면 시간 체크' },
+                { id: '4', date: day2, time: '11:00', child: '최하은', type: '전화', memo: '신체 활동 참여도 및 야외활동 안전 안내' }
+            ];
+        }
+
+        function loadSampleData() {
+            schedules = getSampleSchedules();
+            saveSchedulesToStorage();
+            renderTimeline();
+            showToast('기본 상담 샘플 데이터가 로드되었습니다 ✨');
+        }
+
+        // --- Form Submission / Add & Edit ---
+        function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const date = document.getElementById('consultDate').value;
+            const time = document.getElementById('consultTime').value;
+            const child = document.getElementById('childName').value.trim();
+            const type = document.querySelector('input[name="consultType"]:checked').value;
+            const memo = document.getElementById('consultMemo').value.trim();
+
+            if (!date || !time || !child) return;
+
+            if (editingId) {
+                // Edit existing
+                const index = schedules.findIndex(s => s.id === editingId);
+                if (index !== -1) {
+                    schedules[index] = { id: editingId, date, time, child, type, memo };
+                    showToast('상담 일정이 수정되었습니다 ✏️');
+                }
+                editingId = null;
+                document.getElementById('btnSubmit').innerHTML = '<i class="fa-solid fa-plus"></i> 일정 추가하기';
+                document.getElementById('btnCancelEdit').classList.add('hidden');
+            } else {
+                // Add new
+                const newSchedule = {
+                    id: Date.now().toString(),
+                    date,
+                    time,
+                    child,
+                    type,
+                    memo
+                };
+                schedules.push(newSchedule);
+                showToast('새 상담 일정이 등록되었습니다 🎉');
+            }
+
+            saveSchedulesToStorage();
+            renderTimeline();
+
+            // Reset child name & memo, keep date for convenience
+            document.getElementById('childName').value = '';
+            document.getElementById('consultMemo').value = '';
+            document.getElementById('consultTime').value = '';
+        }
+
+        function editSchedule(id) {
+            const item = schedules.find(s => s.id === id);
+            if (!item) return;
+
+            editingId = id;
+            document.getElementById('consultDate').value = item.date;
+            document.getElementById('consultTime').value = item.time;
+            document.getElementById('childName').value = item.child;
+            document.getElementById('consultMemo').value = item.memo;
+            
+            const radio = document.querySelector(`input[name="consultType"][value="${item.type}"]`);
+            if (radio) radio.checked = true;
+
+            document.getElementById('btnSubmit').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> 일정 수정하기';
+            document.getElementById('btnCancelEdit').classList.remove('hidden');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function cancelEdit() {
+            editingId = null;
+            document.getElementById('btnSubmit').innerHTML = '<i class="fa-solid fa-plus"></i> 일정 추가하기';
+            document.getElementById('btnCancelEdit').classList.add('hidden');
+            document.getElementById('childName').value = '';
+            document.getElementById('consultMemo').value = '';
+        }
+
+        function deleteSchedule(id) {
+            schedules = schedules.filter(s => s.id !== id);
+            saveSchedulesToStorage();
+            renderTimeline();
+            showToast('일정이 삭제되었습니다 🗑️');
+        }
+
+        function clearAllSchedules() {
+            if (schedules.length === 0) return;
+            if (confirm('모든 상담 일정을 비우시겠습니까?')) {
+                schedules = [];
+                saveSchedulesToStorage();
+                renderTimeline();
+                showToast('모든 일정이 삭제되었습니다.');
+            }
+        }
+
+        // --- Render Timeline ---
+        function renderTimeline() {
+            const container = document.getElementById('timelineContainer');
+            const emptyState = document.getElementById('emptyState');
+            const countLabel = document.getElementById('totalScheduleCount');
+
+            countLabel.innerText = schedules.length;
+
+            if (schedules.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            // 1. Group schedules by Date
+            const grouped = {};
+            schedules.forEach(item => {
+                if (!grouped[item.date]) {
+                    grouped[item.date] = [];
+                }
+                grouped[item.date].push(item);
+            });
+
+            // 2. Sort dates ascending
+            const sortedDates = Object.keys(grouped).sort();
+
+            // 3. Generate HTML
+            container.innerHTML = sortedDates.map(dateStr => {
+                // Sort items within same date by time
+                const dayItems = grouped[dateStr].sort((a, b) => a.time.localeCompare(b.time));
+                const formattedDateHeader = formatDateHeader(dateStr);
+
+                return `
+                    <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-md border-2 border-amber-100">
+                        <div class="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
+                            <span class="text-xl">📅</span>
+                            <h4 class="font-cute text-2xl font-bold text-warmGray">${formattedDateHeader}</h4>
+                            <span class="text-xs bg-amber-100 text-amber-800 font-bold px-2.5 py-0.5 rounded-full ml-auto">${dayItems.length}건</span>
+                        </div>
+
+                        <!-- Timeline list -->
+                        <div class="relative space-y-4 timeline-line pl-2">
+                            ${dayItems.map(item => renderTimelineCard(item)).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderTimelineCard(item) {
+            const isVisit = item.type === '방문';
+            
+            // Distinct visual tags for Visit vs Phone Call
+            const badgeBg = isVisit ? 'bg-pastelPinkTag border-pastelPinkTagBorder text-rose-900' : 'bg-pastelBlueTag border-pastelBlueTagBorder text-teal-900';
+            const badgeIcon = isVisit ? 'fa-school' : 'fa-phone';
+
+            return `
+                <div class="relative z-10 flex items-start gap-4 group">
+                    <!-- Dot marker -->
+                    <div class="w-7 h-7 rounded-full ${isVisit ? 'bg-rose-400' : 'bg-teal-500'} text-white flex items-center justify-center text-xs font-bold shadow-md shrink-0 mt-2">
+                        <i class="fa-solid ${badgeIcon}"></i>
+                    </div>
+
+                    <!-- Main Card -->
+                    <div class="flex-1 bg-amber-50/30 hover:bg-amber-50/60 rounded-2xl p-4 border border-amber-100 transition-all shadow-sm hover:shadow">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-base text-gray-800">
+                                    <i class="fa-regular fa-clock text-amber-500 mr-1"></i>${item.time}
+                                </span>
+                                <span class="text-xs font-bold px-2.5 py-0.5 rounded-xl border ${badgeBg}">
+                                    ${item.type} 상담
+                                </span>
+                            </div>
+
+                            <div class="flex items-center gap-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
+                                <button onclick="editSchedule('${item.id}')" title="수정" class="p-1.5 text-gray-500 hover:text-amber-600 rounded-lg hover:bg-amber-100/50 text-xs transition-colors">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <button onclick="deleteSchedule('${item.id}')" title="삭제" class="p-1.5 text-gray-500 hover:text-rose-600 rounded-lg hover:bg-rose-100/50 text-xs transition-colors">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-2">
+                            <span class="text-xs text-gray-500">유아: </span>
+                            <span class="font-bold text-lg text-warmGray">${escapeHtml(item.child)} 어린이</span>
+                        </div>
+
+                        ${item.memo ? `
+                            <div class="bg-white/80 rounded-xl p-3 text-xs text-gray-700 border border-gray-100 shadow-inner mt-1">
+                                <span class="font-bold text-amber-800 block mb-0.5">📌 사전 메모 / 상담 주제:</span>
+                                <p class="whitespace-pre-line leading-relaxed">${escapeHtml(item.memo)}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- Helper Date Formatting ---
+        function formatDateHeader(dateStr) {
+            const [y, m, d] = dateStr.split('-');
+            const dateObj = new Date(y, m - 1, d);
+            const days = ['일', '월', '화', '수', '목', '금', '토'];
+            const dayOfWeek = days[dateObj.getDay()];
+            return `${parseInt(m)}월 ${parseInt(d)}일 (${dayOfWeek})`;
+        }
+
+        // --- Copy Summary Logic ---
+        function copyTimelineSummary() {
+            if (schedules.length === 0) {
+                showToast('복사할 일정이 없습니다.');
+                return;
+            }
+
+            const grouped = {};
+            schedules.forEach(item => {
+                if (!grouped[item.date]) grouped[item.date] = [];
+                grouped[item.date].push(item);
+            });
+
+            const sortedDates = Object.keys(grouped).sort();
+
+            let summaryStr = `📋 [학부모 상담주간 일정표]\n----------------------------------\n`;
+
+            sortedDates.forEach(dStr => {
+                summaryStr += `\n📅 ${formatDateHeader(dStr)}\n`;
+                const dayItems = grouped[dStr].sort((a, b) => a.time.localeCompare(b.time));
+                
+                dayItems.forEach(item => {
+                    summaryStr += `  • [${item.time}] ${item.child} (${item.type} 상담)`;
+                    if (item.memo) summaryStr += ` - 메모: ${item.memo}`;
+                    summaryStr += `\n`;
+                });
+            });
+
+            summaryStr += `\n----------------------------------\n오늘도 원활한 상담 진행을 응원합니다! 🌸`;
+
+            // Clipboard fallback
+            const textArea = document.createElement("textarea");
+            textArea.value = summaryStr;
+            textArea.style.position = "fixed";
+            textArea.style.opacity = "0";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                document.execCommand('copy');
+                showToast('📋 전체 일정 요약이 복사되었습니다!');
+            } catch (err) {
+                showToast('클립보드 접근이 제한되었습니다.');
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // --- Toast Notice ---
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+
+            toastMsg.innerText = message;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+
+        function escapeHtml(str) {
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
